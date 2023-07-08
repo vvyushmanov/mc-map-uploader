@@ -1,0 +1,25 @@
+- name: Copy and extract archive
+  hosts: mc_server
+  become: true
+  vars:
+    new_dir: "Year of Blood"
+    map_name: test
+  # vars_prompt:
+  #   - name: map_name
+  #     prompt: "Введи конечное имя карты (латиницей)"
+  #     private: false
+  tasks:
+    # - name: Extract archive
+    #   ansible.builtin.unarchive:
+    #     src: "{{ maps }}/Year_Of_Blood_1.09.zip"
+    #     dest: "{{ bukkit }}"
+    #     remote_src: true
+    #     owner: minecraft
+    #     group: minecraft
+    #   become: true
+    #   register: result
+
+    # - debug:
+    #     msg: "{{ result.extract_results.out | regex_search(bukkit + '/(.*?)/') | regex_replace(bukkit + '/(.*?)/', '\\1') }}"
+    - name: Rename
+      ansible.builtin.command: "mv '{{ bukkit }}/{{ new_dir }}' {{ bukkit }}/{{ map_name }}"

@@ -1,0 +1,8 @@
+---
+- name: Pinger
+  hosts: mc_server
+  become: true
+  tasks:
+    - name: Ping
+      ansible.builtin.ping:
+

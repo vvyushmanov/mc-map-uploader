@@ -1,0 +1,61 @@
+---
+- name: Copy and extract archive
+  hosts: mc_server
+  become: true
+  vars_prompt:
+    - name: map_name
+      prompt: "Введи конечное имя карты (латиницей)"
+      private: false
+  tasks:
+    - name: Copy maps to server
+      ansible.builtin.copy:
+        src: maps/
+        dest: "{{ maps }}"
+        mode: '0644'
+        owner: minecraft
+        group: minecraft
+      become: true
+    - name: Scan map list
+      ansible.builtin.find:
+        path: "{{ maps }}"
+      register: result
+    - name: Generate options
+      ansible.builtin.set_fact:
+        map_list: "{{ result.files | map(attribute='path') | map('basename') | list | sort }}"
+    - name: Select map
+      ansible.builtin.pause:
+        prompt: |
+          Choose file to select:
+          {% for map in map_list %}
+          {{ loop.index }} {{ map }}
+          {% endfor %}
+      register: result
+    - name: Set archive name
+      ansible.builtin.set_fact:
+        archive: "{{ map_list[result.user_input | int - 1] }}"
+    - name: Extract archive
+      ansible.builtin.unarchive:
+        src: "{{ maps }}/{{ archive }}"
+        dest: "{{ bukkit }}"
+        remote_src: true
+        owner: minecraft
+        group: minecraft
+      become: true
+      register: result
+    - name: Save new dir name
+      ansible.builtin.set_fact:
+        new_dir: "{{ result.extract_results.out | regex_search(bukkit + '/(.*?)/') | regex_replace(bukkit + '/(.*?)/', '\\1') }}"
+    - name: Delete directory (if exists)
+      ansible.builtin.file:
+        path: "{{ bukkit }}/{{ map_name }}"
+        state: absent
+    - name: Rename directory
+      ansible.builtin.command: "mv '{{ bukkit }}/{{ new_dir }}' {{ bukkit }}/{{ map_name }}"
+      changed_when: false
+    - name: Update map and restart server
+      ansible.builtin.command: "{{ bukkit }}/change_map.sh {{ map_name }}"
+      changed_when: false
+      register: command_result
+    - name: Display command output
+      ansible.builtin.debug:
+        var: command_result.stdout_lines
