@@ -7,6 +7,10 @@
       prompt: "Введи конечное имя карты (латиницей)"
       private: false
   tasks:
+    - name: Delete directory (if exists)
+      ansible.builtin.file:
+        path: "{{ bukkit }}/{{ map_name }}"
+        state: absent
     - name: Copy maps to server
       ansible.builtin.copy:
         src: maps/
@@ -45,10 +49,6 @@
     - name: Save new dir name
       ansible.builtin.set_fact:
         new_dir: "{{ result.extract_results.out | regex_search(bukkit + '/(.*?)/') | regex_replace(bukkit + '/(.*?)/', '\\1') }}"
-    - name: Delete directory (if exists)
-      ansible.builtin.file:
-        path: "{{ bukkit }}/{{ map_name }}"
-        state: absent
     - name: Rename directory
       ansible.builtin.command: "mv '{{ bukkit }}/{{ new_dir }}' {{ bukkit }}/{{ map_name }}"
       changed_when: false
