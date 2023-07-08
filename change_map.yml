@@ -50,7 +50,7 @@
       ansible.builtin.set_fact:
         new_dir: "{{ result.extract_results.out | regex_search(bukkit + '/(.*?)/') | regex_replace(bukkit + '/(.*?)/', '\\1') }}"
     - name: Rename directory
-      ansible.builtin.command: "mv '{{ bukkit }}/{{ new_dir }}' {{ bukkit }}/{{ map_name }}"
+      ansible.builtin.command: mv "{{ bukkit }}/{{ new_dir }}" "{{ bukkit }}/{{ map_name }}"
       changed_when: false
     - name: Update dir owner
       ansible.builtin.file:
