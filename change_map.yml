@@ -7,10 +7,18 @@
       prompt: "Введи конечное имя карты (латиницей)"
       private: false
   tasks:
-    - name: Delete directory (if exists)
+    - name: Find directories if they existed
+      ansible.builtin.find:
+        paths: "{{ bukkit }}"
+        patterns: "^{{ map_name }}.*"
+        use_regex: true
+        file_type: directory
+      register: folders_to_delete
+    - name: Delete found directories
       ansible.builtin.file:
-        path: "{{ bukkit }}/{{ map_name }}"
+        path: "{{ item.path }}"
         state: absent
+      with_items: "{{ folders_to_delete.files }}"
     - name: Copy maps to server
       ansible.builtin.copy:
         src: maps/

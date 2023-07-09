@@ -10,25 +10,24 @@
   #     prompt: "Введи конечное имя карты (латиницей)"
   #     private: false
   tasks:
-    - name: Delete directory (if exists)
-      ansible.builtin.file:
-        path: "{{ bukkit }}/Gramm'in Gun"
-        state: absent
-    - name: Extract archive
-      ansible.builtin.unarchive:
-        src: "{{ maps }}/Grammin_Gun.zip"
-        dest: "{{ bukkit }}"
-        remote_src: true
-        owner: minecraft
-        group: minecraft
-      become: true
-      register: result
-    - ansible.builtin.set_fact:
-        new_dir: "{{ result.extract_results.out | regex_search(bukkit + '/(.*?)/') | regex_replace(bukkit + '/(.*?)/', '\\1') }}"
+  - name: Ansible delete file wildcard
+    find:
+      paths: "{{ bukkit }}"
+      patterns: "^test.*"
+      use_regex: true
+      file_type: directory
+    register: wildcard_files_to_delete
+  - name: debug
+    ansible.builtin.file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ wildcard_files_to_delete.files }}"
+    
 
-    - debug:
-        # msg: "{{ result }}"
-        msg: "{{ new_dir }}"
-    - name: Rename directory
-      ansible.builtin.command: mv "{{ bukkit }}/{{ new_dir }}" "{{ bukkit }}/{{ map_name }}"
-      changed_when: false
+
+
+  # - name: Ansible remove file wildcard
+  #   file:
+  #     path: "{{ item.path }}"
+  #     state: absent
+  #   with_items: "{{ wildcard_files_to_delete.files }}"
