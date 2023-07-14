@@ -5,29 +5,14 @@
   vars:
     new_dir: "Year of Blood"
     map_name: test
-  # vars_prompt:
-  #   - name: map_name
-  #     prompt: "Введи конечное имя карты (латиницей)"
-  #     private: false
+  vars_prompt:
+    - name: map_name_input
+      prompt: "Введи конечное имя карты (латиницей)"
+      private: false
   tasks:
-  - name: Ansible delete file wildcard
-    find:
-      paths: "{{ bukkit }}"
-      patterns: "^test.*"
-      use_regex: true
-      file_type: directory
-    register: wildcard_files_to_delete
-  - name: debug
-    ansible.builtin.file:
-      path: "{{ item.path }}"
-      state: absent
-    with_items: "{{ wildcard_files_to_delete.files }}"
-    
+    - name: Make map name lowercase
+      ansible.builtin.set_fact:
+        map_name: "{{ map_name_input | lower }}"
+    - ansible.builtin.debug:
+        msg: "{{ map_name }}"
 
-
-
-  # - name: Ansible remove file wildcard
-  #   file:
-  #     path: "{{ item.path }}"
-  #     state: absent
-  #   with_items: "{{ wildcard_files_to_delete.files }}"

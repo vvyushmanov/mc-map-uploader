@@ -3,10 +3,13 @@
   hosts: mc_server
   become: true
   vars_prompt:
-    - name: map_name
+    - name: map_name_input
       prompt: "Введи конечное имя карты (латиницей)"
       private: false
   tasks:
+    - name: Make map name lowercase
+      ansible.builtin.set_fact:
+        map_name: "{{ map_name_input | lower }}"
     - name: Find directories if they existed
       ansible.builtin.find:
         paths: "{{ bukkit }}"
