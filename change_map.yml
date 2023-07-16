@@ -69,6 +69,14 @@
         owner: minecraft
         group: minecraft
         recurse: true
+    - name: Clear player cache
+      ansible.builtin.file:
+        name: "{{ bukkit }}/usercache.json"
+        state: absent
+    - name: Clear server cache
+      ansible.builtin.file:
+        name: "{{ bukkit }}/cache"
+        state: absent
     - name: Update map and restart server
       ansible.builtin.command: "{{ bukkit }}/change_map.sh {{ map_name }}"
       changed_when: false
